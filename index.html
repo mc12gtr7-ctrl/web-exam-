@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تحليل الاختبارات القصيرة</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Tajawal', sans-serif; }
+    html, body { background: #f0f4f8; height: 100%; }
+    :root {
+      --primary: #0891b2;
+      --success: #06b6d4;
+      --warning: #d97706;
+      --danger: #dc2626;
+    }
+    .num-input {
+      width: 60px;
+      text-align: center;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 13px;
+      background: #f8fafc;
+    }
+    .num-input:focus { outline: none; border-color: var(--primary); background: #fff; }
+    thead th { background: var(--primary); color: #fff; padding: 10px 8px; font-weight: 700; font-size: 12px; }
+    tbody tr:nth-child(even) { background: #f1f5f9; }
+    tbody tr:hover { background: #e8f0f8; }
+    tbody td { padding: 7px 8px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
+    .level-badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .level-A { background: #d1fae5; color: #065f46; }
+    .level-B { background: #dbeafe; color: #1e3a8a; }
+    .level-C { background: #fef9c3; color: #713f12; }
+    .level-D { background: #ffedd5; color: #7c2d12; }
+    .level-E { background: #fee2e2; color: #7f1d1d; }
+    .stat-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 14px 16px; text-align: center; }
+    .stat-card .value { font-size: 24px; font-weight: 800; color: var(--primary); }
+    .stat-card .label { font-size: 11px; color: #64748b; margin-top: 3px; }
+    .btn-primary { background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: background 0.2s; }
+    .btn-primary:hover { background: #1e4158; }
+    .btn-secondary { background: #64748b; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background 0.2s; }
+    .btn-secondary:hover { background: #475569; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-weight: 600; color: #334155; margin-bottom: 6px; font-size: 13px; }
+    .form-input { width: 100%; padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: #f8fafc; }
+    .form-input:focus { outline: none; border-color: var(--primary); background: #fff; }
+    .page { display: none; }
+    .page.active { display: block; }
+    @media print { .no-print { display: none !important; } body { background: #fff; } }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full" style="direction:rtl;margin:0;padding:0;">
+  <div class="w-full h-full overflow-auto" style="margin:0;padding:0;"><!-- Page 1: Input -->
+   <div id="page1" class="page active">
+    <div style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);" class="w-full px-6 py-4">
+     <div class="max-w-7xl mx-auto text-center">
+      <h1 id="main-title" class="text-white text-2xl font-extrabold">تحليل الاختبارات القصيرة</h1>
+      <h1 id="school-name" class="text-white text-xl font-bold mt-2">مدرسة مرفع دارس للتعليم الأساسي (٦-١٠)</h1>
+      <p class="text-white text-sm mt-2 opacity-90">إدخال البيانات الأساسية</p>
+     </div>
+    </div>
+    <div class="max-w-4xl mx-auto px-4 py-8 w-full">
+     <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-bold text-slate-800 mb-6">📋 البيانات الأساسية</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+       <div class="form-group">
+        <label class="form-label">المعلمة *</label> <input type="text" id="teacher_name" placeholder="أدخل اسم المعلمة" class="form-input" oninput="updateConfig()">
+       </div>
+       <div class="form-group">
+        <label class="form-label">المادة *</label> <select id="subject_name" class="form-input" onchange="updateConfig()"> <option value="">-- اختر المادة --</option> <option value="الدراسات الاجتماعية">الدراسات الاجتماعية</option> <option value="التربية الإسلامية">التربية الإسلامية</option> <option value="الرياضيات">الرياضيات</option> <option value="اللغة العربية">اللغة العربية</option> <option value="اللغة الإنجليزية">اللغة الإنجليزية</option> <option value="الكيمياء">الكيمياء</option> <option value="الفيزياء">الفيزياء</option> <option value="الأحياء">الأحياء</option> </select>
+       </div>
+       <div class="form-group">
+        <label class="form-label">الصف *</label> <select id="class_name" class="form-input" onchange="updateConfig()"> <option value="">-- اختر --</option> <option value="الصف السادس">الصف السادس</option> <option value="الصف السابع">الصف السابع</option> <option value="الصف الثامن">الصف الثامن</option> <option value="الصف التاسع">الصف التاسع</option> <option value="الصف العاشر">الصف العاشر</option> </select>
+       </div>
+       <div class="form-group">
+        <label class="form-label">درجة الاختبار *</label> <select id="quiz_grade" class="form-input" onchange="updateConfig()"> <option value="">-- اختر --</option> <option value="15">15 درجة</option> <option value="10">10 درجات</option> </select>
+       </div>
+      </div>
+     </div><!-- Grading Guide -->
+     <div id="grading-guide" class="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg" style="display:none;">
+      <h3 class="font-bold text-slate-700 mb-3 text-sm">📋 معايير التقييم:</h3>
+      <table id="guide-table" class="w-full text-sm">
+       <tbody></tbody>
+      </table>
+     </div><!-- Data Entry Table -->
+     <div id="input-section" style="display:none;">
+      <h3 class="font-bold text-slate-700 mb-4 text-sm">📝 إدخال البيانات حسب الشعب</h3>
+      <div class="flex flex-wrap gap-2 mb-4">
+       <button class="btn-primary" onclick="addClassRow()"><i data-lucide="plus" style="width:14px;height:14px;"></i>إضافة شعبة</button> <button class="btn-secondary" onclick="clearAllRows()"><i data-lucide="trash-2" style="width:14px;height:14px;"></i>مسح البيانات</button>
+      </div>
+      <div class="overflow-x-auto">
+       <table class="w-full border-collapse">
+        <thead id="input-thead"></thead>
+        <tbody id="input-tbody"></tbody>
+       </table>
+      </div>
+     </div><!-- Navigation -->
+     <div class="flex gap-3 mt-8 justify-end">
+      <button class="btn-secondary" onclick="goToPage(2)" style="background: var(--primary);"> <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>الصفحة التالية </button>
+     </div>
+    </div>
+    <div class="bg-slate-200 text-center py-3 text-sm text-slate-600 mt-8 border-t">
+     <div style="font-weight:600;">
+      تصميم الأستاذة <span id="page1-designer">زينب الحديدي</span>
+     </div>
+    </div>
+   </div><!-- Page 2: Analysis & Recommendations -->
+   <div id="page2" class="page">
+    <div style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);" class="w-full px-6 py-4">
+     <div class="max-w-7xl mx-auto text-center">
+      <h1 id="main-title2" class="text-white text-2xl font-extrabold">تحليل الاختبارات القصيرة</h1>
+      <h1 id="school-name2" class="text-white text-xl font-bold mt-2">مدرسة مرفع دارس للتعليم الأساسي (٦-١٠)</h1>
+      <p class="text-white text-sm mt-2 opacity-90">التحليل والتوصيات</p>
+     </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 py-6 w-full"><!-- Header Info -->
+     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-white rounded-lg shadow p-4">
+      <div><span class="font-semibold text-slate-600">المادة:</span> <span id="header-subject" class="font-bold">—</span>
+      </div>
+      <div><span class="font-semibold text-slate-600">المعلمة:</span> <span id="header-teacher" class="font-bold">—</span>
+      </div>
+      <div><span class="font-semibold text-slate-600">الصف:</span> <span id="header-class" class="font-bold">—</span>
+      </div>
+      <div><button class="btn-primary no-print" onclick="window.print()" style="background:var(--primary);"><i data-lucide="printer" style="width:14px;height:14px;"></i>طباعة</button>
+      </div>
+     </div><!-- Stats -->
+     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div class="stat-card">
+       <div class="value" id="best-mastery">
+        —
+       </div>
+       <div class="label">
+        أعلى نسبة إجادة
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="value" id="avg-mastery">
+        —
+       </div>
+       <div class="label">
+        متوسط الإجادة
+       </div>
+      </div> —
+     </div>
+     <div class="label">
+      أعلى نسبة تدني
+     </div>
+    </div>
+   </div><!-- Analysis Table -->
+   <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+    <div id="table-header" class="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 text-white">
+     <h2 id="table-title" class="font-bold text-sm">📊 تحليل البيانات</h2>
+    </div>
+    <div class="overflow-x-auto">
+     <table class="w-full" id="analysis-table">
+      <thead id="analysis-thead"></thead>
+      <tbody id="analysis-tbody"></tbody>
+     </table>
+    </div>
+   </div><!-- Weakest Questions Analysis -->
+   <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+    <div class="bg-gradient-to-r from-amber-600 to-amber-700 px-4 py-3 text-white">
+     <h2 class="font-bold text-sm">⚠️ الأسئلة الضعيفة والتحليل</h2>
+    </div>
+    <div class="overflow-x-auto">
+     <table class="w-full" id="questions-table">
+      <thead id="questions-table">
+       <tr>
+        <th class="p-3 text-right text-xs font-bold text-slate-700">السؤال الأصعب</th>
+        <th class="p-3 text-center text-xs font-bold text-slate-700">نسبة الخطأ</th>
+        <th class="p-3 text-right text-xs font-bold text-slate-700">مستوى السؤال</th>
+        <th class="p-3 text-right text-xs font-bold text-slate-700">السبب المحتمل</th>
+        <th class="p-3 text-right text-xs font-bold text-slate-700">الحل المقترح</th>
+       </tr>
+      </thead>
+      <tbody id="questions-tbody"></tbody>
+     </table>
+    </div>
+   </div><!-- Recommendations -->
+   <div class="bg-white rounded-lg shadow p-4 mb-6">
+    <h3 class="font-bold text-slate-700 mb-4">💡 التوصيات والمقترحات</h3>
+    <div class="mb-4">
+     <label class="text-sm font-semibold text-slate-600 block mb-2">اختر توصية:</label> <select id="recommend-select" class="w-full p-2 border border-slate-300 rounded-lg text-sm" onchange="showRecommendations(this.value)"> <option value="">-- اختر توصية --</option> <option value="therapy">خطة علاجية مكثفة</option> <option value="meeting">لقاء مع الطالبات</option> <option value="practice">تعزيز التمارين العملية</option> <option value="revision">مراجعة الدروس الأساسية</option> <option value="enrichment">برنامج إثراء للطالبات المتفوقات</option> <option value="motivation">جلسات تحفيز وبناء الثقة</option> </select>
+    </div>
+    <div id="recommend-content" class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded text-sm text-slate-700 whitespace-pre-line" style="display:none;"></div>
+   </div><!-- Designer Footer -->
+   <div class="bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-lg shadow p-4 text-center mb-6">
+    <p class="text-sm font-semibold">تصميم الأستاذة <span id="designer-display">زينب الحديدي</span></p>
+   </div><!-- Navigation -->
+   <div class="flex gap-3 justify-between mb-6">
+    <button class="btn-secondary" onclick="goToPage(1)"> <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>الصفحة السابقة </button>
+   </div>
+  </div>
+  <div class="bg-slate-200 text-center py-3 text-sm text-slate-600 border-t">
+   <div style="font-weight:600;">
+    تصميم الأستاذة <span id="page2-designer">زينب الحديدي</span>
+   </div>
+  </div>
+  <script>
+    let currentData = { subject: '', teacher: '', date: '', quizType: '', quizGrade: '', classes: [] };
+    let nextId = 1;
+
+    const defaultConfig = {
+      title: "تحليل الاختبارات القصيرة",
+      school_name: "مدرسة مرفع دارس للتعليم الأساسي (٦-١٠)",
+      designer_name: "زينب الحديدي"
+    };
+
+    const recommendations = {
+      therapy: "📋 خطة علاجية مكثفة:\n• جلسات فردية أسبوعية للطالبات الضعيفات\n• تركيز على المفاهيم الأساسية\n• تقييمات يومية قصيرة\n• تعزيزات فورية عند التحسن",
+      meeting: "👥 لقاء مع الطالبات:\n• نقاش أسباب الصعوبات\n• التعرف على الحواجز التعليمية\n• وضع خطة مشتركة للتحسن\n• دعم معنوي وتحفيز",
+      practice: "✏️ تعزيز التمارين العملية:\n• زيادة عدد التمارين المنزلية\n• تطبيق عملي أسبوعي\n• مراجعة جماعية للحلول\n• ألعاب تعليمية تفاعلية",
+      revision: "📚 مراجعة الدروس الأساسية:\n• إعادة تدريس المفاهيم الأساسية\n• استخدام طرق تدريس متنوعة\n• عمل ملخصات مركزة\n• ربط بين الدروس الجديدة والقديمة",
+      enrichment: "🌟 برنامج إثراء للطالبات المتفوقات:\n• مشاريع بحثية متقدمة\n• قراءات إضافية متخصصة\n• تطبيقات عملية معقدة\n• فرص للقيادة والتدريس",
+      motivation: "💪 جلسات تحفيز وبناء الثقة:\n• تقديم كلمات تشجيع فردية\n• الاحتفال بالتقدم الصغير\n• ربط المادة بواقع الحياة\n• دعم نفسي مستمر"
+    };
+
+    const performanceTypes = ['معرفة', 'تطبيق', 'تقييم'];
+    const suggestionsByPerformance = {
+      'معرفة': 'إعادة شرح الفكرة بطرق مختلفة وأمثلة إضافية',
+      'تطبيق': 'تقديم تمارين تطبيقية إضافية وحل نماذج',
+      'تقييم': 'جلسات نقدية تحليلية مع التركيز على الاستنتاجات'
+    };
+
+    const gradeGuides = {
+      '15': [
+        { grade: 'أ', range: '14-15' },
+        { grade: 'ب', range: '12-13' },
+        { grade: 'ج', range: '10-11' },
+        { grade: 'د', range: '8-9' },
+        { grade: 'ه', range: '7 فأقل' }
+      ],
+      '10': [
+        { grade: 'أ', range: '9-10' },
+        { grade: 'ب', range: '8' },
+        { grade: 'ج', range: '7' },
+        { grade: 'د', range: '5-6' },
+        { grade: 'ه', range: 'أقل من 5' }
+      ]
+    };
+
+    function updateConfig() {
+      currentData.subject = document.getElementById('subject_name').value;
+      currentData.teacher = document.getElementById('teacher_name').value;
+      currentData.className = document.getElementById('class_name').value;
+      currentData.quizGrade = document.getElementById('quiz_grade').value;
+      
+      const guideDiv = document.getElementById('grading-guide');
+      const inputSection = document.getElementById('input-section');
+      
+      if (currentData.quizGrade) {
+        guideDiv.style.display = 'block';
+        inputSection.style.display = 'block';
+        renderGradingGuide();
+        renderInputTable();
+      } else {
+        guideDiv.style.display = 'none';
+        inputSection.style.display = 'none';
+      }
+    }
+
+    function renderGradingGuide() {
+      const tbody = document.getElementById('guide-table').querySelector('tbody');
+      tbody.innerHTML = '';
+      const guide = gradeGuides[currentData.quizGrade];
+      guide.forEach(g => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-2 font-bold text-slate-700 text-center" style="border:1px solid #e2e8f0;">التقدير: ${g.grade}</td>
+          <td class="p-2 text-slate-700 text-center" style="border:1px solid #e2e8f0;">النطاق: ${g.range}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderInputTable() {
+      const thead = document.getElementById('input-thead');
+      const guide = gradeGuides[currentData.quizGrade];
+
+      thead.innerHTML = `
+        <tr style="background: #3b82f6; color: #fff;">
+          <th class="p-2 text-right text-xs">#</th>
+          <th class="p-2 text-right text-xs">الشعبة</th>
+          <th class="p-2 text-right text-xs">عدد الطالبات</th>
+          ${guide.map(g => `<th class="p-2 text-center text-xs">${g.grade} (${g.range})</th>`).join('')}
+          <th class="p-2 text-center text-xs">حذف</th>
+        </tr>
+      `;
+
+      if (currentData.classes.length === 0) {
+        addClassRow();
+      } else {
+        renderClassRows();
+      }
+    }
+
+    function addClassRow() {
+      const id = nextId++;
+      const guide = gradeGuides[currentData.quizGrade];
+      const newClass = { id, name: '', studentCount: '', grades: Array(guide.length).fill('') };
+      currentData.classes.push(newClass);
+      renderClassRow(newClass);
+    }
+
+    function renderClassRow(cls) {
+      const tbody = document.getElementById('input-tbody');
+      const guide = gradeGuides[currentData.quizGrade];
+      
+      const tr = document.createElement('tr');
+      tr.dataset.id = cls.id;
+      tr.style.borderBottom = '1px solid #e2e8f0';
+
+      let html = `
+        <td class="p-2 text-slate-400 font-bold row-num">1</td>
+        <td class="p-2">
+          <select onchange="updateClassData(${cls.id}, 'name', this.value)" 
+            style="width:100px;border:1.5px solid #cbd5e1;border-radius:6px;padding:5px;font-size:12px;">
+            <option value="">-- اختر --</option>
+            ${Array.from({length: 10}, (_, i) => `<option value="${i + 1}" ${cls.name === String(i + 1) ? 'selected' : ''}>الشعبة ${i + 1}</option>`).join('')}
+          </select>
+        </td>
+        <td class="p-2">
+          <input type="number" placeholder="العدد" value="${cls.studentCount}" min="1"
+            style="width:80px;border:1.5px solid #cbd5e1;border-radius:6px;padding:5px;font-size:12px;text-align:center;"
+            oninput="updateClassData(${cls.id}, 'studentCount', this.value)" />
+        </td>
+      `;
+
+      guide.forEach((g, idx) => {
+        html += `
+          <td class="text-center">
+            <input type="number" min="0" class="num-input" value="${cls.grades[idx]}"
+              oninput="updateClassData(${cls.id}, 'grade', ${idx}, this.value)" />
+          </td>
+        `;
+      });
+
+      html += `
+        <td class="text-center">
+          <button onclick="deleteClassRow(${cls.id})" style="background:none;border:none;color:#ef4444;cursor:pointer;">
+            <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+          </button>
+        </td>
+      `;
+
+      tr.innerHTML = html;
+      tbody.appendChild(tr);
+      updateRowNumbers();
+      lucide.createIcons();
+    }
+
+    function renderClassRows() {
+      const tbody = document.getElementById('input-tbody');
+      tbody.innerHTML = '';
+      currentData.classes.forEach(cls => renderClassRow(cls));
+    }
+
+    function updateRowNumbers() {
+      const rows = document.querySelectorAll('#input-tbody tr');
+      rows.forEach((r, i) => {
+        const n = r.querySelector('.row-num');
+        if (n) n.textContent = i + 1;
+      });
+    }
+
+    function updateClassData(id, field, indexOrValue, value) {
+      const cls = currentData.classes.find(c => c.id === id);
+      if (cls) {
+        if (field === 'name') {
+          cls.name = indexOrValue;
+        } else if (field === 'studentCount') {
+          cls.studentCount = indexOrValue;
+        } else if (field === 'grade') {
+          cls.grades[indexOrValue] = value;
+        }
+      }
+    }
+
+    function deleteClassRow(id) {
+      currentData.classes = currentData.classes.filter(c => c.id !== id);
+      const tr = document.querySelector(`tr[data-id="${id}"]`);
+      if (tr) tr.remove();
+      updateRowNumbers();
+    }
+
+    function clearAllRows() {
+      currentData.classes = [];
+      document.getElementById('input-tbody').innerHTML = '';
+    }
+
+    function goToPage(pageNum) {
+      if (pageNum === 2) {
+        if (!currentData.subject || !currentData.teacher || !currentData.className || !currentData.quizGrade) {
+          alert('الرجاء ملء جميع البيانات الأساسية المطلوبة');
+          return;
+        }
+        if (currentData.classes.length === 0) {
+          alert('الرجاء إضافة بيانات الطالبات');
+          return;
+        }
+      }
+
+      document.getElementById('page1').classList.remove('active');
+      document.getElementById('page2').classList.remove('active');
+
+      if (pageNum === 1) {
+        document.getElementById('page1').classList.add('active');
+      } else {
+        document.getElementById('page2').classList.add('active');
+        updateAnalysisPage();
+      }
+    }
+
+    function updateAnalysisPage() {
+      document.getElementById('header-subject').textContent = currentData.subject;
+      document.getElementById('header-teacher').textContent = currentData.teacher;
+      document.getElementById('header-class').textContent = currentData.className;
+      document.getElementById('main-title2').textContent = document.getElementById('main-title').textContent;
+      document.getElementById('school-name2').textContent = document.getElementById('school-name').textContent;
+
+      const guide = gradeGuides[currentData.quizGrade];
+
+      let maxMastery = 0, maxMasteryClass = '', maxDeficit = 0, maxDeficitClass = '';
+      let totalMastery = 0;
+
+      const thead = document.getElementById('analysis-thead');
+      thead.innerHTML = `
+        <tr style="background: var(--primary); color: #fff;">
+          <th class="p-2 text-right text-xs">الشعبة</th>
+          <th class="p-2 text-right text-xs">عدد الطالبات</th>
+          ${guide.map((g, i) => `<th class="p-2 text-center text-xs">${g.grade} (${g.range})</th>`).join('')}
+          <th class="p-2 text-center text-xs">المجموع</th>
+          <th class="p-2 text-center text-xs">% الإجادة</th>
+          <th class="p-2 text-center text-xs">% التدني</th>
+        </tr>
+      `;
+
+      const tbody = document.getElementById('analysis-tbody');
+      tbody.innerHTML = '';
+
+      // حساب البيانات أولاً
+      const classesData = currentData.classes.map(cls => {
+        const total = cls.grades.reduce((a, b) => a + parseInt(b || 0), 0);
+        const mastery = total > 0 ? Math.round(((parseInt(cls.grades[0] || 0) + parseInt(cls.grades[1] || 0)) / total) * 100) : 0;
+        const deficit = total > 0 ? Math.round(((parseInt(cls.grades[3] || 0) + parseInt(cls.grades[4] || 0)) / total) * 100) : 0;
+
+        if (mastery > maxMastery) {
+          maxMastery = mastery;
+          maxMasteryClass = cls.name || 'غير محدد';
+        }
+        if (deficit > maxDeficit) {
+          maxDeficit = deficit;
+          maxDeficitClass = cls.name || 'غير محدد';
+        }
+
+        totalMastery += mastery;
+
+        return { cls, total, mastery, deficit };
+      });
+
+      // ترتيب حسب الإجادة تنازلياً
+      classesData.sort((a, b) => b.mastery - a.mastery);
+
+      // عرض الجداول مرتبة
+      classesData.forEach(data => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-2 font-semibold text-slate-700">${data.cls.name || '—'}</td>
+          <td class="p-2 text-center font-semibold">${data.cls.studentCount || '—'}</td>
+          ${data.cls.grades.map(g => `<td class="text-center">${g || '0'}</td>`).join('')}
+          <td class="text-center font-bold">${data.total}</td>
+          <td class="text-center"><span class="level-badge level-A" style="background:var(--success);color:#fff;">${data.mastery}%</span></td>
+          <td class="text-center"><span class="level-badge level-E" style="background:var(--danger);color:#fff;">${data.deficit}%</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const avgMastery = classesData.length > 0 ? Math.round(totalMastery / classesData.length) : 0;
+
+      document.getElementById('best-mastery').textContent = maxMasteryClass;
+      document.getElementById('avg-mastery').textContent = avgMastery + '%';
+      document.getElementById('most-deficit').textContent = maxDeficit + '%';
+
+      const tableTitle = document.getElementById('table-title');
+      tableTitle.textContent = `📊 تحليل ${currentData.subject} - ${currentData.className} (درجة كاملة: ${currentData.quizGrade})`;
+
+      renderWeakestQuestionsTable();
+    }
+
+    const questionLevelOptions = {
+      'معرفة': 'معرفة',
+      'تطبيق': 'تطبيق',
+      'تقييم': 'تقييم'
+    };
+
+    const weaknessReasons = {
+      'ضعف المفاهيم الأساسية': 'ضعف المفاهيم الأساسية',
+      'عدم الفهم الكافي': 'عدم الفهم الكافي',
+      'صعوبة التطبيق': 'صعوبة التطبيق',
+      'عدم الممارسة الكافية': 'عدم الممارسة الكافية',
+      'مستوى السؤال صعب': 'مستوى السؤال صعب',
+      'ربط ضعيف بالدروس السابقة': 'ربط ضعيف بالدروس السابقة'
+    };
+
+    const suggestedSolutions = {
+      'إعادة تدريس الفكرة': 'إعادة تدريس الفكرة بطرق مختلفة وأمثلة إضافية',
+      'تمارين إضافية': 'تقديم تمارين تطبيقية إضافية وحل نماذج شاملة',
+      'جلسات تفاعلية': 'جلسات نقاش تفاعلية مع التركيز على الاستنتاجات',
+      'ممارسة موجهة': 'ممارسة موجهة مع تعزيز فوري ودعم شخصي',
+      'وسائل متنوعة': 'استخدام وسائل تعليمية متنوعة (مرئية، سمعية، عملية)',
+      'أنشطة إثرائية': 'أنشطة إثرائية وتطبيقات عملية'
+    };
+
+    function renderWeakestQuestionsTable() {
+      const totalGrades = parseInt(currentData.quizGrade);
+      const tbody = document.getElementById('questions-tbody');
+      tbody.innerHTML = '';
+
+      const questionErrors = [];
+      
+      for (let qIdx = 0; qIdx < totalGrades; qIdx++) {
+        let totalCorrect = 0;
+        let totalStudents = 0;
+        let errorCount = 0;
+
+        currentData.classes.forEach(cls => {
+          const correct = parseInt(cls.grades[qIdx] || 0);
+          const students = parseInt(cls.studentCount || 0);
+          totalCorrect += correct;
+          totalStudents += students;
+          errorCount += (students - correct);
+        });
+
+        const errorRate = totalStudents > 0 ? Math.round(((totalStudents - totalCorrect) / totalStudents) * 100) : 0;
+        
+        questionErrors.push({
+          qNum: qIdx + 1,
+          errorRate: errorRate,
+          errorCount: errorCount,
+          totalCorrect: totalCorrect,
+          totalStudents: totalStudents
+        });
+      }
+
+      // ترتيب بناءً على نسبة الخطأ وأخذ أعلى 3
+      questionErrors.sort((a, b) => b.errorRate - a.errorRate);
+      const topThree = questionErrors.slice(0, 3);
+
+      topThree.forEach((q, idx) => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #e2e8f0';
+        tr.dataset.questionNum = q.qNum;
+
+        let errorColor = '#10b981';
+        if (q.errorRate >= 70) errorColor = '#dc2626';
+        else if (q.errorRate >= 50) errorColor = '#f97316';
+        else if (q.errorRate >= 30) errorColor = '#eab308';
+
+        const levelOptions = Object.keys(questionLevelOptions).map(k => 
+          `<option value="${k}">${k}</option>`
+        ).join('');
+
+        const reasonOptions = Object.keys(weaknessReasons).map(k => 
+          `<option value="${k}">${k}</option>`
+        ).join('');
+
+        const solutionOptions = Object.keys(suggestedSolutions).map(k => 
+          `<option value="${k}">${k}</option>`
+        ).join('');
+
+        tr.innerHTML = `
+          <td class="p-3 text-right font-semibold text-slate-700">السؤال ${q.qNum}</td>
+          <td class="p-3 text-center">
+            <span class="px-2 py-1 rounded-full text-xs font-bold" style="background:${errorColor}20;color:${errorColor};">${q.errorRate}% (${q.errorCount})</span>
+          </td>
+          <td class="p-3 text-right">
+            <select class="w-full border-1.5 border-slate-300 rounded-lg px-2 py-1 text-xs" style="background:#f8fafc;" data-field="level">
+              <option value="">-- اختر --</option>
+              ${levelOptions}
+            </select>
+          </td>
+          <td class="p-3 text-right">
+            <select class="w-full border-1.5 border-slate-300 rounded-lg px-2 py-1 text-xs" style="background:#f8fafc;" data-field="reason">
+              <option value="">-- اختر --</option>
+              ${reasonOptions}
+            </select>
+          </td>
+          <td class="p-3 text-right">
+            <select class="w-full border-1.5 border-slate-300 rounded-lg px-2 py-1 text-xs" style="background:#f8fafc;" data-field="solution">
+              <option value="">-- اختر --</option>
+              ${solutionOptions}
+            </select>
+          </td>
+        `;
+        
+        tbody.appendChild(tr);
+      });
+    }
+
+    function showRecommendations(key) {
+      const content = document.getElementById('recommend-content');
+      if (key && recommendations[key]) {
+        content.textContent = recommendations[key];
+        content.style.display = 'block';
+      } else {
+        content.style.display = 'none';
+      }
+    }
+
+    // SDK Init
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (config) => {
+        document.getElementById('main-title').textContent = config.title || defaultConfig.title;
+        document.getElementById('main-title2').textContent = config.title || defaultConfig.title;
+        document.getElementById('school-name').textContent = config.school_name || defaultConfig.school_name;
+        document.getElementById('school-name2').textContent = config.school_name || defaultConfig.school_name;
+        document.getElementById('designer-display').textContent = config.designer_name || defaultConfig.designer_name;
+        document.getElementById('page1-designer').textContent = config.designer_name || defaultConfig.designer_name;
+        document.getElementById('page2-designer').textContent = config.designer_name || defaultConfig.designer_name;
+      },
+      mapToCapabilities: (config) => ({
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ['title', config.title || defaultConfig.title],
+        ['school_name', config.school_name || defaultConfig.school_name],
+        ['designer_name', config.designer_name || defaultConfig.designer_name]
+      ])
+    });
+
+
+
+    lucide.createIcons();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e2ca829f1dda145',t:'MTc3NDU5NjI4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
